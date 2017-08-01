@@ -18,6 +18,11 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableModel;
+import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.model.inference.OWLReasonerManager;
+import org.protege.editor.owl.model.inference.ReasonerStatus;
+import org.protege.editor.owl.model.inference.ReasonerUtilities;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,15 +49,17 @@ public class YASPPMainPanel extends JPanel
                         "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +"\n" +
                         "SELECT ?subject ?object" +"\n" +
                         " WHERE { ?subject rdfs:subClassOf ?object }";
-     
-    public YASPPMainPanel()
+     OWLEditorKit editorKit;
+    public YASPPMainPanel(OWLEditorKit kit)
      {
+        editorKit=kit;
         setLayout(new GridLayout(1,1));
         queryArea=new JTextPane();
         queryArea.setText(defaultText);
         scrollNorthArea=new JScrollPane(queryArea);
         
         execute= new JButton("Execute");
+        execute.addActionListener(new ExecuteActionListener());
         export= new JButton("Export");
         exportOpz = new JButton("Option");
         importQ = new JButton("Import");
@@ -81,7 +88,7 @@ public class YASPPMainPanel extends JPanel
         
         splitter=new JSplitPane(JSplitPane.VERTICAL_SPLIT,scrollNorthArea, southPanel); 
         splitter.setResizeWeight(0.7);
-        add(splitter);
+        add(splitter);       
       
      } 
     
@@ -141,6 +148,22 @@ public class YASPPMainPanel extends JPanel
         }
       }   
      }
+   
+   class ExecuteActionListener implements ActionListener
+   {   
+     
+    @Override
+    public void actionPerformed(ActionEvent event)
+      {        
+        OWLReasonerManager reasonerManager =  editorKit.getOWLModelManager().getOWLReasonerManager();
+        ReasonerUtilities.warnUserIfReasonerIsNotConfigured(editorKit.getOWLWorkspace(), reasonerManager);
+        if (reasonerManager.getReasonerStatus() == ReasonerStatus.INITIALIZED)
+         {
+                OWLReasoner reasoner = reasonerManager.getCurrentReasoner();
+                log.info("OK");
+         }   
+     }
+    }
   
   }
 
