@@ -22,7 +22,8 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.inference.OWLReasonerManager;
 import org.protege.editor.owl.model.inference.ReasonerStatus;
 import org.protege.editor.owl.model.inference.ReasonerUtilities;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.protege.editor.owl.rdf.repository.BasicSparqlReasoner;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,9 +159,10 @@ public class YASPPMainPanel extends JPanel
         OWLReasonerManager reasonerManager =  editorKit.getOWLModelManager().getOWLReasonerManager();
         ReasonerUtilities.warnUserIfReasonerIsNotConfigured(editorKit.getOWLWorkspace(), reasonerManager);
         if (reasonerManager.getReasonerStatus() == ReasonerStatus.INITIALIZED)
-         {
-                OWLReasoner reasoner = reasonerManager.getCurrentReasoner();
-                log.info("OK");
+         {        
+            OWLOntologyManager manager=editorKit.getOWLModelManager().getOWLOntologyManager();
+            BasicSparqlReasoner reasoner =new BasicSparqlReasoner(manager);
+            log.info("ok");
          }   
      }
     }
