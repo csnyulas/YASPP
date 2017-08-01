@@ -19,6 +19,6 @@
 		<label value="YASPP Query" />
 		<class value="dmi.protege.YASPP.view.YASPPInputView" />
 		<headerColor value="@org.protege.ontologycolor"/>
-		<category value="@org.protege.ontologycategory" />
+		<category value="@org.protege.querycategory" />
 	</extension>          
 </plugin>

@@ -4,16 +4,28 @@ package dmi.protege.YASPP.view;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 public class YASPPMainPanel extends JPanel 
   {  
+     static final Logger log = LoggerFactory.getLogger(YASPPMainPanel.class);
      JTextPane queryArea;
      JTable outArea;
      JPanel buttonArea;
@@ -25,6 +37,7 @@ public class YASPPMainPanel extends JPanel
      JButton export;
      JButton exportOpz;
      JButton importQ;
+     JButton saveQ;
      String defaultText="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+"\n"+
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +"\n"+
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +"\n" +
@@ -43,11 +56,16 @@ public class YASPPMainPanel extends JPanel
         export= new JButton("Export");
         exportOpz = new JButton("Option");
         importQ = new JButton("Import");
+        importQ.addActionListener(new ImportActionListener());
+        saveQ=new JButton("Save");
+        saveQ.addActionListener(new SaveActionListener());
         buttonArea = new JPanel(new FlowLayout());
         buttonArea.add(execute);
+        buttonArea.add(saveQ);        
+        buttonArea.add(importQ);
         buttonArea.add(export);
         buttonArea.add(exportOpz);
-        buttonArea.add(importQ);
+        
         
              
         YASPPTableModel model = new YASPPTableModel(1, 2);
@@ -73,6 +91,56 @@ public class YASPPMainPanel extends JPanel
        // refreshButton.removeActionListener(refreshAction);
     }
     
+  class SaveActionListener implements ActionListener
+  {    
+    @Override
+    public void actionPerformed(ActionEvent event)
+      {
+       JFileChooser chooser = new JFileChooser();       
+      int retrival = chooser.showSaveDialog(null);
+      if (retrival == JFileChooser.APPROVE_OPTION)
+        {
+         try 
+          {
+            FileWriter fw = new FileWriter(chooser.getSelectedFile()+".SPARQL");
+            fw.write(queryArea.getText());
+            fw.close();
+          } 
+         catch (IOException ex)
+           {
+             log.info("Error on writing Query on file.");
+           }
+        }
+      }
+    }
+  
+   class ImportActionListener implements ActionListener
+   {    
+    @Override
+    public void actionPerformed(ActionEvent event)
+      {
+       JFileChooser chooser = new JFileChooser();       
+      int retrival = chooser.showOpenDialog(null);
+      if (retrival == JFileChooser.APPROVE_OPTION)
+        {
+         try 
+          {
+            FileReader fr = new FileReader(chooser.getSelectedFile());
+	    BufferedReader br = new BufferedReader(fr);
+   	    String sCurrentLine=null;
+            String fstring="";
+	    while ((sCurrentLine = br.readLine()) != null)             
+	       fstring+=sCurrentLine+"\n";
+	    queryArea.setText(fstring);
+
+          } 
+         catch (IOException ex)
+           {
+             log.info("Error on readin Query file.");
+           }
+        }
+      }   
+     }
   
   }
 
@@ -89,3 +157,5 @@ public class YASPPMainPanel extends JPanel
           return false;
             }
      }
+
+ 
