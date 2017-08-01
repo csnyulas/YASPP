@@ -16,7 +16,7 @@ public class YASPPInputView extends AbstractOWLViewComponent {
         setLayout(new GridLayout(1,1));        
         yaspppanel = new YASPPMainPanel(getOWLEditorKit());        
         add(yaspppanel);        
-        log.info("Example View Component initialized");
+        //log.info("Example View Component initialized");
         
     }
 
