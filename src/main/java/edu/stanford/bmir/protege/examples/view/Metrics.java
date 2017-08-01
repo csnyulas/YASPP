@@ -1,5 +1,6 @@
 package edu.stanford.bmir.protege.examples.view;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
@@ -8,6 +9,7 @@ import javax.swing.JPanel;
 
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.event.EventType;
+import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 
 public class Metrics extends JPanel {
@@ -19,12 +21,18 @@ public class Metrics extends JPanel {
     private OWLModelManager modelManager;
 
 
-    private ActionListener refreshAction = e -> recalculate();
-    
-    private OWLModelManagerListener modelListener = event -> {
-        if (event.getType() == EventType.ACTIVE_ONTOLOGY_CHANGED) {
+    private ActionListener refreshAction = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
             recalculate();
         }
+    };
+    
+    private OWLModelManagerListener modelListener = new OWLModelManagerListener() {
+		public void handleChange(OWLModelManagerChangeEvent event) {
+			if (event.getType() == EventType.ACTIVE_ONTOLOGY_CHANGED) {
+				recalculate();
+			}
+		}
     };
     
     public Metrics(OWLModelManager modelManager) {
