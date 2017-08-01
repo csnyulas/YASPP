@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>edu.stanford.protege</groupId>
-	<artifactId>protege.plugin.examples</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+	<artifactId>protege.plugin.YASPP</artifactId>
+	<version>0.0.1-alpha</version>
 	<packaging>bundle</packaging>
 
-	<name>Protege Plugin Examples</name>
-	<description>Example plug-ins for the Protege Desktop ontology editor, e.g., views, menu items, etc.</description>
+	<name>YASPP Plugin for Protege</name>
+	<description> Yet Another SPARQL Plugin for Protege</description>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
