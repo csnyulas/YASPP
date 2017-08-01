@@ -2,11 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>dmi.protege</groupId>
+	<groupId>dmi.protege.YASPP</groupId>
 	<artifactId>protege.plugin.YASPP</artifactId>
-	<version>0.0.1-alpha</version>
-	<packaging>bundle</packaging>
-
+	<version>0.0.1-alpha</version>	
+        <packaging>bundle</packaging>
 	<name>YASPP Plugin for Protege</name>
 	<description> Yet Another SPARQL Plugin for Protege</description>
 	
