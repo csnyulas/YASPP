@@ -1,15 +1,5 @@
 package dmi.protege.YASPP.view;
 
-
-//import static com.hp.hpl.jena.assembler.JA.FileManager;
-/*import static com.hp.hpl.jena.assembler.JA.FileManager;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter; */
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -30,7 +20,6 @@ import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.table.DefaultTableModel;
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.logging.Level;
@@ -38,7 +27,6 @@ import org.protege.editor.owl.rdf.SparqlInferenceFactory;
 import org.protege.editor.owl.rdf.SparqlReasoner;
 import org.protege.editor.owl.rdf.SparqlReasonerException;
 import org.protege.editor.owl.rdf.SparqlResultSet;
-import org.protege.editor.owl.rdf.repository.BasicSparqlReasoner;
 import org.protege.editor.owl.rdf.repository.BasicSparqlReasonerFactory;
 
 
@@ -118,8 +106,9 @@ public class YASPPMainPanel extends JPanel
     
     
     public void dispose() {
-       // modelManager.removeListener(modelListener);
-       // refreshButton.removeActionListener(refreshAction);
+       if (reasoner != null) {
+			reasoner.dispose();
+			reasoner = null;}
     }
     
      
@@ -186,50 +175,7 @@ public class YASPPMainPanel extends JPanel
             for(int i=0; i<set.getColumnCount(); i++)
                 for(int j=0; j<set.getRowCount(); j++)
                     log.info(set.getResult(i, j).toString());
-//        OWLReasonerManager reasonerManager =  editorKit.getOWLModelManager().getOWLReasonerManager();
-//        ReasonerUtilities.warnUserIfReasonerIsNotConfigured(editorKit.getOWLWorkspace(), reasonerManager);
-//        if (reasonerManager.getReasonerStatus() == ReasonerStatus.INITIALIZED)
-//         {        
-//           try
-//           {
-//            OWLOntologyManager manager=OWLManager.createOWLOntologyManager();
-//            OWLOntology infOnt=manager.createOntology();
-//            OWLDataFactory datafactory= manager.getOWLDataFactory();
-//            List<InferredAxiomGenerator<? extends OWLAxiom>> gens = new ArrayList<>();
-//            gens.add(new InferredSubClassAxiomGenerator());
-//            gens.add(new InferredClassAssertionAxiomGenerator());
-//            gens.add( new InferredDisjointClassesAxiomGenerator());
-//            gens.add( new InferredEquivalentClassAxiomGenerator());
-//            gens.add( new InferredEquivalentDataPropertiesAxiomGenerator());
-//            gens.add( new InferredEquivalentObjectPropertyAxiomGenerator());
-//            gens.add( new InferredInverseObjectPropertiesAxiomGenerator());
-//            gens.add( new InferredObjectPropertyCharacteristicAxiomGenerator());
-//            gens.add( new InferredPropertyAssertionGenerator());
-//            gens.add( new InferredSubDataPropertyAxiomGenerator());
-//            gens.add( new InferredSubObjectPropertyAxiomGenerator());
-//            InferredOntologyGenerator iog = new InferredOntologyGenerator(editorKit.getModelManager().getReasoner(), gens);
-//            iog.fillOntology(datafactory, infOnt);
-//            for(OWLOntology o : editorKit.getOWLModelManager().getActiveOntologies())
-//              {
-//                for(OWLAnnotationAssertionAxiom ax : o.getAxioms(AxiomType.ANNOTATION_ASSERTION)) {
-//                    manager.applyChange(new AddAxiom(infOnt, ax));
-//                }
-//              }
-//            File output = File.createTempFile("temp", "owl");
-//            IRI documentIRI2 = IRI.create(output);
-//            manager.saveOntology(infOnt, documentIRI2);
-//            FileReader reader= new FileReader(output);
-//            Query q = QueryFactory.create(queryArea.getText());            
-//            QueryExecution qe = QueryExecutionFactory.create( q, FileManager.getModel().read(reader, "defaultText"));
-//            ResultSet rs = qe.execSelect(); 
-//            ResultSetFormatter.out( rs );
-//            log.info(rs.toString());
-//          }
-//        catch (OWLOntologyCreationException | IOException | OWLOntologyStorageException ex)   
-//          {
-//
-//          }
-            //  }
+
           } catch (SparqlReasonerException ex)
           {
             java.util.logging.Logger.getLogger(YASPPMainPanel.class.getName()).log(Level.SEVERE, null, ex);
