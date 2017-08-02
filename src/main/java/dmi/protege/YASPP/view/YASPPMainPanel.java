@@ -174,7 +174,7 @@ public class YASPPMainPanel extends JPanel
             SparqlResultSet set = reasoner.executeQuery(queryArea.getText());
             for(int i=0; i<set.getColumnCount(); i++)
                 for(int j=0; j<set.getRowCount(); j++)
-                    log.info(set.getResult(i, j).toString());
+                    log.info(set.getResult(j,i).toString());
 
           } catch (SparqlReasonerException ex)
           {
