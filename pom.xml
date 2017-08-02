@@ -28,114 +28,76 @@
         </developer>
     </developers>
 
-      
-
-    <dependencies>
-       <dependency>
-	<groupId>net.sourceforge.owlapi</groupId>
-	<artifactId>pellet-owlapi-ignazio1977</artifactId>
-	<version>2.4.0-ignazio1977</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-osgi -->
-<!-- https://mvnrepository.com/artifact/com.hp.hpl.jena/jena -->
+     
+ <dependencies>      
 <dependency>
     <groupId>com.hp.hpl.jena</groupId>
-    <artifactId>jena</artifactId>
-    <version>2.6.4</version>
-</dependency>
+    <artifactId>arq</artifactId>
+    <version>2.8.8</version>
+</dependency> 
     
     <!-- https://mvnrepository.com/artifact/edu.stanford.protege/org.protege.editor.owl -->
+    <dependency>
+	<groupId>edu.stanford.protege</groupId>
+           <artifactId>protege-editor-owl</artifactId>
+	<version>5.0.0</version>
+        </dependency>
+  <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
 <dependency>
     <groupId>edu.stanford.protege</groupId>
-    <artifactId>org.protege.editor.owl</artifactId>
-    <version>5.0.0-beta-17</version>
+    <artifactId>sparql-query-plugin</artifactId>
+    <version>2.0.2</version>
 </dependency>
-  
-      <dependency>
-    <groupId>org.apache.jena</groupId>
-    <artifactId>apache-jena-libs</artifactId>
-    <type>pom</type>
-    <version>3.4.0</version>
-  </dependency>
-    </dependencies>
-    
+
+ </dependencies>
     <build>
         <plugins>
-
-
-<plugin>
-
-<groupId>org.apache.maven.plugins</groupId>
-
-<artifactId>maven-compiler-plugin</artifactId>
-
-<version>3.6.1</version>
-
-
-<configuration>
-
-<source>1.8</source>
-
-<target>1.8</target>
-
-</configuration>
-
-</plugin>
-
-
-
-<plugin>
-
-<groupId>org.apache.felix</groupId>
-
-<artifactId>maven-bundle-plugin</artifactId>
-
-<version>3.0.1</version>
-
-<extensions>true</extensions>
-
-
-<configuration>
-
-
-<instructions>
-
-<Bundle-SymbolicName>dmi.protege.YASPP;singleton:=true</Bundle-SymbolicName>
-
-<Bundle-Vendor> DMI UNICT</Bundle-Vendor>
-
-<Include-Resource>{maven-resources}</Include-Resource>
-
-</instructions>
-
-</configuration>
-
-
-<executions>
-
-
-<execution>
-
-<id>bundle-manifest</id>
-
-<phase>process-classes</phase>
-
-
-<goals>
-
-<goal>manifest</goal>
-
-</goals>
-
-</execution>
-
-</executions>
-
-</plugin>
-
-
-
-
-</plugins>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<version>3.6.1</version>
+		<configuration>
+		   <source>1.8</source>
+		   <target>1.8</target>
+		</configuration>
+	    </plugin>
+            
+            <plugin>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>maven-bundle-plugin</artifactId>
+		<version>3.0.0</version>
+		<extensions>true</extensions>
+		<configuration>
+		 <instructions>
+		 <Bundle-Activator>org.protege.editor.owl.ProtegeOWL</Bundle-Activator>
+		 <Bundle-ClassPath>.</Bundle-ClassPath>
+			<Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
+			<Bundle-Vendor>The Protege Development Team</Bundle-Vendor>
+			<Import-Package>
+		    	   org.protege.editor.core;version="5.0", <!-- equivalent to [5.0,infinity) -->
+                            org.protege.editor.core.ui.error;version="5.0",
+                            org.protege.editor.owl;version="5.0",
+                            org.protege.editor.owl.model;version="5.0",
+                            org.protege.editor.owl.ui;version="5.0",
+                            org.protege.editor.owl.ui.renderer;version="5.0",
+                            org.protege.editor.owl.ui.table;version="5.0",
+                            org.protege.editor.owl.ui.view;version="5.0",
+                            org.protege.owl.rdf;version="2.0",
+                            *
+			</Import-Package>
+                         <Export-Package>org.protege.editor.owl.rdf.*;version="5.0.0"</Export-Package>
+                 <Include-Resource>{maven-resources}</Include-Resource>       
+                 </instructions>
+		</configuration>
+            </plugin>
+            
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<pde>true</pde>
+				</configuration>
+			</plugin>
+		</plugins>
     </build>
 </project>
