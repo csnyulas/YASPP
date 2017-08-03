@@ -1,6 +1,8 @@
 package dmi.protege.YASPP.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -23,6 +25,10 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.logging.Level;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import org.protege.editor.owl.rdf.SparqlInferenceFactory;
 import org.protege.editor.owl.rdf.SparqlReasoner;
 import org.protege.editor.owl.rdf.SparqlReasonerException;
@@ -47,6 +53,7 @@ public class YASPPMainPanel extends JPanel
      JButton exportOpz;
      JButton importQ;
      JButton saveQ;
+     OptionDialog optionD;
      String defaultText="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+"\n"+
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +"\n"+
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +"\n" +
@@ -75,6 +82,7 @@ public class YASPPMainPanel extends JPanel
         execute.addActionListener(new ExecuteActionListener());
         export= new JButton("Export");
         exportOpz = new JButton("Option");
+        exportOpz.addActionListener(new OptionActionListener());
         importQ = new JButton("Import");
         importQ.addActionListener(new ImportActionListener());
         saveQ=new JButton("Save");
@@ -103,6 +111,7 @@ public class YASPPMainPanel extends JPanel
         splitter.setResizeWeight(0.7);
         add(splitter);       
       
+        optionD=new OptionDialog(null);
      } 
     
     
@@ -112,6 +121,17 @@ public class YASPPMainPanel extends JPanel
 			reasoner = null;}
     }
     
+  class OptionActionListener implements ActionListener
+    {
+
+        @Override
+        public void actionPerformed(ActionEvent e)
+          { 
+           optionD.setVisible(true);
+           
+          }
+    
+    }
      
   class SaveActionListener implements ActionListener
   {    
@@ -158,7 +178,7 @@ public class YASPPMainPanel extends JPanel
           } 
          catch (IOException ex)
            {
-             log.info("Error on readin Query file.");
+             log.info("Error on reading Query file.");
            }
         }
       }   
@@ -189,6 +209,22 @@ public class YASPPMainPanel extends JPanel
           }
     }
   
+  }
+
+   
+public class OptionDialog extends JDialog
+  {
+    public OptionDialog (JFrame parent)
+     {
+         super(parent, "Options");
+         setSize(300,300);
+         setPreferredSize(new Dimension(300,300));
+         setVisible(false);
+         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+         setModal(true);
+         setLocationRelativeTo(null);
+        
+     }    
   }
 
   }
