@@ -36,6 +36,7 @@ public class YASPPMainPanel extends JPanel
      SparqlReasoner reasoner;
      JTextPane queryArea;
      JTable outArea;
+     YASPPTableModel model;
      JPanel buttonArea;
      JPanel southPanel;
      JScrollPane scrollNorthArea;
@@ -87,7 +88,7 @@ public class YASPPMainPanel extends JPanel
         
         
              
-        YASPPTableModel model = new YASPPTableModel(1, 2);
+        model = new YASPPTableModel(1, 2);
         model.setColumnIdentifiers(new String[]{"?subject","?object"});
         outArea=new JTable(model);
         
@@ -172,11 +173,17 @@ public class YASPPMainPanel extends JPanel
         try
           {
             SparqlResultSet set = reasoner.executeQuery(queryArea.getText());
+            String data[][]=new String[set.getRowCount()][set.getColumnCount()];
+            String names[]=new String[set.getColumnCount()];
             for(int i=0; i<set.getColumnCount(); i++)
                 for(int j=0; j<set.getRowCount(); j++)
-                    log.info(set.getResult(j,i).toString());
-
-          } catch (SparqlReasonerException ex)
+                    data[j][i]=(set.getResult(j,i).toString());
+            for(int i=0; i<set.getColumnCount();i++)
+                names[i]=set.getColumnName(i);
+            model.setDataVector(data, names);
+            model.fireTableDataChanged();
+          } 
+        catch (SparqlReasonerException ex)
           {
             java.util.logging.Logger.getLogger(YASPPMainPanel.class.getName()).log(Level.SEVERE, null, ex);
           }
