@@ -200,9 +200,8 @@ public class YASPPMainPanel extends JPanel
                    result.append(",");
                  bw.write(result.toString());
                }
-            result.append("]}"); //close binding end results
-            result.append("}"); //close json            
-            bw.write(result.toString());
+                       
+            bw.write("]}}");
             bw.close();
           }
 
