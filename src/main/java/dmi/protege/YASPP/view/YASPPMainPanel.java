@@ -33,14 +33,12 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import javax.swing.JOptionPane;
 import org.protege.editor.owl.rdf.SparqlInferenceFactory;
 import org.protege.editor.owl.rdf.SparqlReasoner;
 import org.protege.editor.owl.rdf.SparqlReasonerException;
 import org.protege.editor.owl.rdf.SparqlResultSet;
-import org.protege.editor.owl.rdf.SwingResultModel;
 import org.protege.editor.owl.rdf.repository.BasicSparqlReasonerFactory;
-import org.protege.editor.owl.ui.table.BasicOWLTable;
 
 
 public class YASPPMainPanel extends JPanel 
@@ -72,7 +70,7 @@ public class YASPPMainPanel extends JPanel
     public YASPPMainPanel(OWLEditorKit kit)
      {
         optionConfig=new OptionConfig();
-        editorKit=kit;
+        editorKit=kit;        
         List<SparqlInferenceFactory> plugins = Collections.singletonList((SparqlInferenceFactory) new BasicSparqlReasonerFactory());
 	reasoner = plugins.iterator().next().createReasoner(editorKit.getOWLModelManager().getOWLOntologyManager());
          try
@@ -106,7 +104,7 @@ public class YASPPMainPanel extends JPanel
         
         
              
-        model = new YASPPTableModel(1, 2);
+        model = new YASPPTableModel(0, 2);
         model.setColumnIdentifiers(new String[]{"?subject","?object"});
         outArea=new JTable(model);
         
@@ -169,10 +167,16 @@ public class YASPPMainPanel extends JPanel
                       result+="\""+ model.getColumnName(j) +"\":";
                       result+="{";
                       result+="\"type\":";
-                      //here the type
-                      result+=",";
-                      result+="\"value\":";
-                      //the value here.
+                      if(!model.getValueAt(i, j).toString().startsWith("\""))
+                        {
+                          result+="\"uri\",\"value\":";                          
+                          result+="\""+model.getValueAt(i, j)+"\"";
+                        }
+                      else
+                        {                         
+                          result+="\"literal\",\"value\":";                          
+                          result+="\""+model.getValueAt(i, j)+"\"";                        
+                        }
                       result+="}";
                       if(j!=model.getColumnCount()-1)
                        result+=",";
@@ -189,16 +193,21 @@ public class YASPPMainPanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e)
           { 
-            JFileChooser chooser = new JFileChooser();       
-            switch (optionConfig.format)
-              {
-                 case 0:
-                  {
-                    int retrival = chooser.showSaveDialog(null);
-                    if (retrival == JFileChooser.APPROVE_OPTION)
-                       {
-                         try 
-                            {
+            if(model.getDataVector().isEmpty())
+                 {
+                   JOptionPane.showMessageDialog(null, "No query executed. Execute a query.");
+                   return;
+                 }
+            JFileChooser chooser = new JFileChooser();     
+            int retrival = chooser.showSaveDialog(null);
+            if (retrival == JFileChooser.APPROVE_OPTION)
+             {               
+              try 
+               {
+                  switch (optionConfig.format)
+                     {
+                          case 0:
+                             {                   
                              // FileWriter fw = new FileWriter(chooser.getSelectedFile()+".xls");
                               HSSFWorkbook workbook = new HSSFWorkbook();
                               HSSFSheet sheet = workbook.createSheet(chooser.getSelectedFile().getName()+".xls");  
@@ -216,22 +225,24 @@ public class YASPPMainPanel extends JPanel
                                    sheet.autoSizeColumn(i); 
                                FileOutputStream fileOut = new FileOutputStream(chooser.getSelectedFile()+".xls");
                                workbook.write(fileOut);
-                               fileOut.close();                        
-                             } 
-                         catch (IOException ex)
-                              {
-                                log.info("Error on writing Query on file.");
-                              }
-                        }
-                       break;
+                               fileOut.close();
+                               break;                       
+                             }                     
+                          case 1: 
+                              {                            
+                                String rs= toJSON(model); 
+                                FileWriter fw = new FileWriter(chooser.getSelectedFile()+".srj");
+                                fw.write(rs);
+                                fw.close();                             
+                                break;  
+                              } 
+                          default: break;
                     }
-                 case 1: 
-                         { 
-                            String rs= toJSON(model); 
-                            //log.info(rs);
-                            break; 
-                         } 
-                    default: break;
+                 }
+                 catch (IOException ex)
+                   {
+                     log.info("Error on writing Query on file.");
+                   }
               }           
           }    
     }
@@ -388,7 +399,7 @@ public class OptionDialog extends JDialog
 
     public YASPPTableModel(int x, int y)
       {
-         super(x, y);
+         super(x, y);         
       }
            
     public boolean isCellEditable() {
