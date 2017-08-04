@@ -11,6 +11,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -144,50 +146,66 @@ public class YASPPMainPanel extends JPanel
     class ExportActionListener implements ActionListener
     {
 
-        private String toJSON(YASPPTableModel model)
+        private void toJSON(YASPPTableModel model, String file) throws IOException
           {
-            String result="{" + "\"head\": {";
-            result+="\"vars\": [";
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+            StringBuilder result = new StringBuilder();
+            result.append("{" + "\"head\": {");
+            result.append("\"vars\": [");
             for(int i=0; i<model.getColumnCount(); i++)
               {
-                result+="\"" + model.getColumnName(i) + "\"";
+                result.append("\"").append(model.getColumnName(i)).append("\"");
                 if(i!=model.getColumnCount()-1)
-                   result+=",";
+                   result.append(",");
               }
-            result+="]"; //close vars
-            result+="},"; //close head
-            result+="\"results\": { ";
-            result+=" \"bindings\": ["; //open bindings
-           
+            result.append("]"); //close vars
+            result.append("},"); //close head
+            result.append("\"results\": { ");
+            result.append(" \"bindings\": ["); //open bindings
+            bw.write(result.toString());
             for(int i=0; i < model.getRowCount(); i++)
                {
-                result+="{";
+                result=new StringBuilder();
+                result.append("{");
                 for(int j=0; j < model.getColumnCount(); j++)
                  {
-                   result+="\""+ model.getColumnName(j) +"\":";
-                   result+="{";
-                   result+="\"type\":";                   
+                   result.append("\"").append(model.getColumnName(j)).append("\":");
+                   result.append("{");
+                   result.append("\"type\":");                   
                    if(!model.getValueAt(i, j).toString().startsWith("\""))
                       {
-                        result+="\"uri\",\"value\":";                          
-                        result+=model.getValueAt(i, j);
+                        result.append(result).append("\"uri\",\"value\":");                          
+                        result.append(model.getValueAt(i, j).toString());
                       }
                     else
-                      {                         
-                        result+="\"literal\",\"value\":";                          
-                        result+="\""+model.getValueAt(i, j)+"\"";                        
+                      {   
+                        
+    //                    String value= model.getValueAt(i, j).toString();
+   //                     log.info(value);
+   //                     int f= value.indexOf("^");                     
+   //                     String tmp=value.substring(0, f);
+   //                     log.info(tmp); 
+  //                      log.info(""+f);
+                          
+//                        result.append("\"literal\",\"value\":");   
+//                        result.append(tmp).append("\"");
+//                        
+//                        result.append(",\"datatype\":");
+//                        result.append(value.substring(f+2, value.length()-2)).append("\"");
                        }
-                     result+="}";
+                     result.append("}");
                      if(j!=model.getColumnCount()-1)
-                     result+=",";
+                     result.append(",");
                   }
-                 result+="}";
+                 result.append("}");
                  if(i!=model.getRowCount()-1)
-                   result+=",";
+                   result.append(",");
+                 bw.write(result.toString());
                }
-            result+="]}"; //close binding end results
-            result+="}"; //close json
-            return result;
+            result.append("]}"); //close binding end results
+            result.append("}"); //close json            
+            bw.write(result.toString());
+            bw.close();
           }
 
         @Override
@@ -230,11 +248,8 @@ public class YASPPMainPanel extends JPanel
                              }                     
                           case 1: 
                               {                            
-                                String rs= toJSON(model); 
-                                log.info(rs);
-                                FileWriter fw = new FileWriter(chooser.getSelectedFile()+".srj");
-                                fw.write(rs);
-                                fw.close();                             
+                                toJSON(model, chooser.getSelectedFile()+".srj");                                 
+                                                            
                                 break;  
                               } 
                           default: break;
