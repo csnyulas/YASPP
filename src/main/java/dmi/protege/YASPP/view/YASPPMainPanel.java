@@ -152,38 +152,38 @@ public class YASPPMainPanel extends JPanel
               {
                 result+="\"" + model.getColumnName(i) + "\"";
                 if(i!=model.getColumnCount()-1)
-                    result+=",";
+                   result+=",";
               }
             result+="]"; //close vars
             result+="},"; //close head
             result+="\"results\": { ";
             result+=" \"bindings\": ["; //open bindings
-            
-             for(int i=0; i < model.getRowCount(); i++)
+           
+            for(int i=0; i < model.getRowCount(); i++)
                {
-                  result+="{";
-                  for(int j=0; j < model.getColumnCount(); j++)
-                    {
-                      result+="\""+ model.getColumnName(j) +"\":";
-                      result+="{";
-                      result+="\"type\":";
-                      if(!model.getValueAt(i, j).toString().startsWith("\""))
-                        {
-                          result+="\"uri\",\"value\":";                          
-                          result+="\""+model.getValueAt(i, j)+"\"";
-                        }
-                      else
-                        {                         
-                          result+="\"literal\",\"value\":";                          
-                          result+="\""+model.getValueAt(i, j)+"\"";                        
-                        }
-                      result+="}";
-                      if(j!=model.getColumnCount()-1)
-                       result+=",";
-                    }
-                  result+="}";
-                  if(i!=model.getRowCount()-1)
-                      result+=",";
+                result+="{";
+                for(int j=0; j < model.getColumnCount(); j++)
+                 {
+                   result+="\""+ model.getColumnName(j) +"\":";
+                   result+="{";
+                   result+="\"type\":";                   
+                   if(!model.getValueAt(i, j).toString().startsWith("\""))
+                      {
+                        result+="\"uri\",\"value\":";                          
+                        result+=model.getValueAt(i, j);
+                      }
+                    else
+                      {                         
+                        result+="\"literal\",\"value\":";                          
+                        result+="\""+model.getValueAt(i, j)+"\"";                        
+                       }
+                     result+="}";
+                     if(j!=model.getColumnCount()-1)
+                     result+=",";
+                  }
+                 result+="}";
+                 if(i!=model.getRowCount()-1)
+                   result+=",";
                }
             result+="]}"; //close binding end results
             result+="}"; //close json
@@ -231,6 +231,7 @@ public class YASPPMainPanel extends JPanel
                           case 1: 
                               {                            
                                 String rs= toJSON(model); 
+                                log.info(rs);
                                 FileWriter fw = new FileWriter(chooser.getSelectedFile()+".srj");
                                 fw.write(rs);
                                 fw.close();                             
