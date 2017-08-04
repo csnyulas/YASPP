@@ -1,13 +1,17 @@
 package dmi.protege.YASPP.view;
-
+import  org.apache.poi.hssf.usermodel.HSSFSheet;
+import  org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import  org.apache.poi.hssf.usermodel.HSSFRow;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,15 +29,18 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.logging.Level;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.JLabel;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.protege.editor.owl.rdf.SparqlInferenceFactory;
 import org.protege.editor.owl.rdf.SparqlReasoner;
 import org.protege.editor.owl.rdf.SparqlReasonerException;
 import org.protege.editor.owl.rdf.SparqlResultSet;
+import org.protege.editor.owl.rdf.SwingResultModel;
 import org.protege.editor.owl.rdf.repository.BasicSparqlReasonerFactory;
+import org.protege.editor.owl.ui.table.BasicOWLTable;
 
 
 public class YASPPMainPanel extends JPanel 
@@ -61,8 +68,10 @@ public class YASPPMainPanel extends JPanel
                         "SELECT ?subject ?object" +"\n" +
                         " WHERE { ?subject rdfs:subClassOf ?object }";
      OWLEditorKit editorKit;
+     OptionConfig optionConfig;
     public YASPPMainPanel(OWLEditorKit kit)
      {
+        optionConfig=new OptionConfig();
         editorKit=kit;
         List<SparqlInferenceFactory> plugins = Collections.singletonList((SparqlInferenceFactory) new BasicSparqlReasonerFactory());
 	reasoner = plugins.iterator().next().createReasoner(editorKit.getOWLModelManager().getOWLOntologyManager());
@@ -81,6 +90,7 @@ public class YASPPMainPanel extends JPanel
         execute= new JButton("Execute");
         execute.addActionListener(new ExecuteActionListener());
         export= new JButton("Export");
+        export.addActionListener(new ExportActionListener());
         exportOpz = new JButton("Option");
         exportOpz.addActionListener(new OptionActionListener());
         importQ = new JButton("Import");
@@ -132,7 +142,56 @@ public class YASPPMainPanel extends JPanel
           }
     
     }
-     
+    
+    class ExportActionListener implements ActionListener
+    {
+
+        @Override
+        public void actionPerformed(ActionEvent e)
+          { 
+            JFileChooser chooser = new JFileChooser();       
+            switch (optionConfig.format)
+              {
+                 case 0:
+                  {
+                    int retrival = chooser.showSaveDialog(null);
+                    if (retrival == JFileChooser.APPROVE_OPTION)
+                       {
+                         try 
+                            {
+                             // FileWriter fw = new FileWriter(chooser.getSelectedFile()+".xls");
+                              HSSFWorkbook workbook = new HSSFWorkbook();
+                              HSSFSheet sheet = workbook.createSheet(chooser.getSelectedFile().getName()+".xls");  
+                                   
+           
+                              for(int i=0; i < model.getRowCount(); i++)
+                                {
+                                  HSSFRow rowhead = sheet.createRow((short)i);
+                                  
+                                  for(int j=0; j < model.getColumnCount(); j++)
+                                    {
+                                      rowhead.createCell(j).setCellValue(model.getValueAt(i,j).toString());                                       
+                                    }
+                                  
+                                }
+                               for(int i=0; i< model.getColumnCount(); i++)
+                                   sheet.autoSizeColumn(i); 
+                               FileOutputStream fileOut = new FileOutputStream(chooser.getSelectedFile()+".xls");
+                               workbook.write(fileOut);
+                               fileOut.close();                        
+                             } 
+                         catch (IOException ex)
+                              {
+                                log.info("Error on writing Query on file.");
+                              }
+                        }
+                       break;
+                    }
+                    default: break;
+              }           
+          }    
+    }
+    
   class SaveActionListener implements ActionListener
   {    
     @Override
@@ -186,20 +245,28 @@ public class YASPPMainPanel extends JPanel
    
    class ExecuteActionListener implements ActionListener
    {   
+        private String[][] createData(SparqlResultSet set)
+          {
+            String data[][]=new String[set.getRowCount()][set.getColumnCount()];
+            for(int i=0; i<set.getColumnCount(); i++)
+                for(int j=0; j<set.getRowCount(); j++)
+                    data[j][i]=(set.getResult(j,i).toString());
+            return data;
+          }
      
     @Override
     public void actionPerformed(ActionEvent event)
       {    
         try
-          {
-            SparqlResultSet set = reasoner.executeQuery(queryArea.getText());
-            String data[][]=new String[set.getRowCount()][set.getColumnCount()];
-            String names[]=new String[set.getColumnCount()];
-            for(int i=0; i<set.getColumnCount(); i++)
-                for(int j=0; j<set.getRowCount(); j++)
-                    data[j][i]=(set.getResult(j,i).toString());
+          {            
+            SparqlResultSet set = reasoner.executeQuery(queryArea.getText());                      
+            String data[][];                  
+            
+            String names[]=new String[set.getColumnCount()];        
             for(int i=0; i<set.getColumnCount();i++)
                 names[i]=set.getColumnName(i);
+            
+            data=createData(set);
             model.setDataVector(data, names);
             model.fireTableDataChanged();
           } 
@@ -214,17 +281,60 @@ public class YASPPMainPanel extends JPanel
    
 public class OptionDialog extends JDialog
   {
+    JPanel topPanel;
+    JPanel bottomPanel;
+    JComboBox formatBox;
+    JButton okbutton;
+    
     public OptionDialog (JFrame parent)
      {
          super(parent, "Options");
-         setSize(300,300);
-         setPreferredSize(new Dimension(300,300));
-         setVisible(false);
-         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+         setSize(300,150);
+         setPreferredSize(new Dimension(300,150));
+         setVisible(false);         
          setModal(true);
          setLocationRelativeTo(null);
-        
-     }    
+         setLayout(new BorderLayout());
+         addWindowListener(new WindowAdapter() {
+                     @Override
+                     public void windowClosing(WindowEvent e) {
+                                    closeDiscard(); //do something
+                         }});
+         
+         
+         formatBox=new JComboBox(new String[]{"Microsoft Excel", "Text"});
+         formatBox.setPreferredSize(new Dimension(200, formatBox.getPreferredSize().height));
+         
+         optionConfig=new OptionConfig(formatBox.getSelectedIndex());
+         
+         okbutton=new JButton("OK");
+         okbutton.addActionListener(new ActionListener(){
+                                        @Override
+                                        public void actionPerformed(ActionEvent e)
+                                          {
+                                            optionConfig.save(formatBox.getSelectedIndex());
+                                            dispose();
+                                          }
+                                   });
+                 
+         
+         topPanel=new JPanel();
+         topPanel.setLayout(new FlowLayout());
+         topPanel.add(new JLabel("Export Format"));
+         topPanel.add(formatBox);
+         
+         bottomPanel=new JPanel();
+         bottomPanel.setLayout(new FlowLayout());
+         bottomPanel.add(okbutton);
+         
+         add(topPanel, BorderLayout.NORTH);
+         add(bottomPanel, BorderLayout.SOUTH);
+     }  
+    public void closeDiscard()
+      {
+          formatBox.setSelectedIndex(optionConfig.format);
+          dispose();
+      }
   }
 
   }
@@ -241,5 +351,13 @@ public class OptionDialog extends JDialog
           return false;
             }
      }
+
+class OptionConfig
+  {
+     int format;
+     public OptionConfig(){ format=-1;}
+     public OptionConfig(int value){format=value;}
+     public void save(int _format){format=_format;}
+  }
 
  
