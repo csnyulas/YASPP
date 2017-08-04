@@ -193,7 +193,7 @@ public class YASPPMainPanel extends JPanel
                           {
                             f=value.indexOf("@");
                             type="xml:lang";
-                            s=f+1;
+                            s=f+2;
                             t=0;
                           }
                            String tmp=value.substring(0, f);                            
