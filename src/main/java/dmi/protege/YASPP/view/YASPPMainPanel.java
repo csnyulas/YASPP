@@ -179,17 +179,30 @@ public class YASPPMainPanel extends JPanel
                       }
                     else
                       {  
+                        result.append("\"literal\",\"value\":"); 
+                        String value= model.getValueAt(i, j).toString();                         
+                        int f= value.indexOf("^");
+                        String type="";
+                        int s=f+3;
+                        int t=1;
+                        if(f>=0)       
+                          {
+                            type="datatype";
+                          }
+                        else
+                          {
+                            f=value.indexOf("@");
+                            type="xml:lang";
+                            s=f+1;
+                            t=0;
+                          }
+                           String tmp=value.substring(0, f);                            
+                           result.append(tmp);
                         
-                        String value= model.getValueAt(i, j).toString();                        
-                        int f= value.indexOf("^");                     
-                        String tmp=value.substring(0, f);                        
+                           result.append(",\"").append(type).append("\":\"");
+                           result.append(value.substring(f, value.length()-t));
+                           result.append("\"");
                           
-                        result.append("\"literal\",\"value\":");   
-                        result.append(tmp);
-                        
-                        result.append(",\"datatype\":\"");
-                        result.append(value.substring(f+3, value.length()-1));
-                        result.append("\"");
                        }
                      result.append("}");
                      if(j!=model.getColumnCount()-1)
