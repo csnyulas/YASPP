@@ -174,24 +174,22 @@ public class YASPPMainPanel extends JPanel
                    result.append("\"type\":");                   
                    if(!model.getValueAt(i, j).toString().startsWith("\""))
                       {
-                        result.append(result).append("\"uri\",\"value\":");                          
-                        result.append(model.getValueAt(i, j).toString());
+                        result.append("\"uri\",\"value\":\"");                          
+                        result.append(model.getValueAt(i, j).toString()).append("\"");
                       }
                     else
-                      {   
+                      {  
                         
-    //                    String value= model.getValueAt(i, j).toString();
-   //                     log.info(value);
-   //                     int f= value.indexOf("^");                     
-   //                     String tmp=value.substring(0, f);
-   //                     log.info(tmp); 
-  //                      log.info(""+f);
+                        String value= model.getValueAt(i, j).toString();                        
+                        int f= value.indexOf("^");                     
+                        String tmp=value.substring(0, f);                        
                           
-//                        result.append("\"literal\",\"value\":");   
-//                        result.append(tmp).append("\"");
-//                        
-//                        result.append(",\"datatype\":");
-//                        result.append(value.substring(f+2, value.length()-2)).append("\"");
+                        result.append("\"literal\",\"value\":");   
+                        result.append(tmp);
+                        
+                        result.append(",\"datatype\":\"");
+                        result.append(value.substring(f+3, value.length()-1));
+                        result.append("\"");
                        }
                      result.append("}");
                      if(j!=model.getColumnCount()-1)
