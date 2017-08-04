@@ -146,6 +146,46 @@ public class YASPPMainPanel extends JPanel
     class ExportActionListener implements ActionListener
     {
 
+        private String toJSON(YASPPTableModel model)
+          {
+            String result="{" + "\"head\": {";
+            result+="\"vars\": [";
+            for(int i=0; i<model.getColumnCount(); i++)
+              {
+                result+="\"" + model.getColumnName(i) + "\"";
+                if(i!=model.getColumnCount()-1)
+                    result+=",";
+              }
+            result+="]"; //close vars
+            result+="},"; //close head
+            result+="\"results\": { ";
+            result+=" \"bindings\": ["; //open bindings
+            
+             for(int i=0; i < model.getRowCount(); i++)
+               {
+                  result+="{";
+                  for(int j=0; j < model.getColumnCount(); j++)
+                    {
+                      result+="\""+ model.getColumnName(j) +"\":";
+                      result+="{";
+                      result+="\"type\":";
+                      //here the type
+                      result+=",";
+                      result+="\"value\":";
+                      //the value here.
+                      result+="}";
+                      if(j!=model.getColumnCount()-1)
+                       result+=",";
+                    }
+                  result+="}";
+                  if(i!=model.getRowCount()-1)
+                      result+=",";
+               }
+            result+="]}"; //close binding end results
+            result+="}"; //close json
+            return result;
+          }
+
         @Override
         public void actionPerformed(ActionEvent e)
           { 
@@ -162,8 +202,6 @@ public class YASPPMainPanel extends JPanel
                              // FileWriter fw = new FileWriter(chooser.getSelectedFile()+".xls");
                               HSSFWorkbook workbook = new HSSFWorkbook();
                               HSSFSheet sheet = workbook.createSheet(chooser.getSelectedFile().getName()+".xls");  
-                                   
-           
                               for(int i=0; i < model.getRowCount(); i++)
                                 {
                                   HSSFRow rowhead = sheet.createRow((short)i);
@@ -187,6 +225,12 @@ public class YASPPMainPanel extends JPanel
                         }
                        break;
                     }
+                 case 1: 
+                         { 
+                            String rs= toJSON(model); 
+                            //log.info(rs);
+                            break; 
+                         } 
                     default: break;
               }           
           }    
@@ -302,7 +346,7 @@ public class OptionDialog extends JDialog
                          }});
          
          
-         formatBox=new JComboBox(new String[]{"Microsoft Excel", "Text"});
+         formatBox=new JComboBox(new String[]{"Microsoft Excel", "SPARQL JSON","Text"});
          formatBox.setPreferredSize(new Dimension(200, formatBox.getPreferredSize().height));
          
          optionConfig=new OptionConfig(formatBox.getSelectedIndex());
