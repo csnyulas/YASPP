@@ -191,16 +191,16 @@ public class YASPPMainPanel extends JPanel
                           }
                         else
                           {
-                            f=value.indexOf("@");
+                            f=value.indexOf("@"); 
                             type="xml:lang";
-                            s=f+2;
+                            s=f+1;
                             t=0;
                           }
                            String tmp=value.substring(0, f);                            
                            result.append(tmp);
                         
                            result.append(",\"").append(type).append("\":\"");
-                           result.append(value.substring(f, value.length()-t));
+                           result.append(value.substring(s, value.length()-t));
                            result.append("\"");
                           
                        }
@@ -383,7 +383,7 @@ public class OptionDialog extends JDialog
                          }});
          
          
-         formatBox=new JComboBox(new String[]{"Microsoft Excel", "SPARQL JSON","Text"});
+         formatBox=new JComboBox(new String[]{"Microsoft Excel", "SPARQL JSON"});
          formatBox.setPreferredSize(new Dimension(200, formatBox.getPreferredSize().height));
          
          optionConfig=new OptionConfig(formatBox.getSelectedIndex());
