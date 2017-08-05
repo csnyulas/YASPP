@@ -146,9 +146,8 @@ public class YASPPMainPanel extends JPanel
     class ExportActionListener implements ActionListener
     {
 
-        private void toJSON(YASPPTableModel model, String file) throws IOException
-          {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+        private void toJSON(YASPPTableModel model,  BufferedWriter bw) throws IOException
+          {            
             StringBuilder result = new StringBuilder();
             result.append("{" + "\"head\": {");
             result.append("\"vars\": [");
@@ -181,26 +180,26 @@ public class YASPPMainPanel extends JPanel
                       {  
                         result.append("\"literal\",\"value\":"); 
                         String value= model.getValueAt(i, j).toString();                         
-                        int f= value.indexOf("^");
+                        int dataMark= value.indexOf("^");
                         String type="";
-                        int s=f+3;
-                        int t=1;
-                        if(f>=0)       
+                        int initMark=dataMark+3;
+                        int finMark=1;
+                        if(dataMark>=0)       
                           {
                             type="datatype";
                           }
                         else
                           {
-                            f=value.indexOf("@"); 
+                            dataMark=value.indexOf("@"); 
                             type="xml:lang";
-                            s=f+1;
-                            t=0;
+                            initMark=dataMark+1;
+                            finMark=0;
                           }
-                           String tmp=value.substring(0, f);                            
+                           String tmp=value.substring(0, dataMark);                            
                            result.append(tmp);
                         
                            result.append(",\"").append(type).append("\":\"");
-                           result.append(value.substring(s, value.length()-t));
+                           result.append(value.substring(initMark, value.length()-finMark));
                            result.append("\"");
                           
                        }
@@ -214,8 +213,7 @@ public class YASPPMainPanel extends JPanel
                  bw.write(result.toString());
                }
                        
-            bw.write("]}}");
-            bw.close();
+            bw.write("]}}");            
           }
 
         @Override
@@ -257,9 +255,11 @@ public class YASPPMainPanel extends JPanel
                                break;                       
                              }                     
                           case 1: 
-                              {                            
-                                toJSON(model, chooser.getSelectedFile()+".srj");                                 
-                                                            
+                              {     
+                                BufferedWriter bw = 
+                                    new BufferedWriter(new FileWriter(chooser.getSelectedFile()+".srj", true));
+                                toJSON(model, bw);                                 
+                                bw.close();
                                 break;  
                               } 
                           default: break;
