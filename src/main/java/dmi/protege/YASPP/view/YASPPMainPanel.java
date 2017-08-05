@@ -12,7 +12,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -30,12 +29,12 @@ import javax.swing.table.DefaultTableModel;
 import org.protege.editor.owl.OWLEditorKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.logging.Level;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import org.protege.editor.owl.rdf.SparqlInferenceFactory;
 import org.protege.editor.owl.rdf.SparqlReasoner;
 import org.protege.editor.owl.rdf.SparqlReasonerException;
@@ -130,7 +129,49 @@ public class YASPPMainPanel extends JPanel
 			reasoner.dispose();
 			reasoner = null;}
     }
-    
+
+    class ErrorQueryMessage extends JDialog
+      {
+          private JPanel envir;
+          private JButton okbut;
+          public ErrorQueryMessage(String message, String title)
+            {
+               setTitle(title);
+               setVisible(false);         
+               setModal(true);
+               setLocationRelativeTo(null); 
+               setSize(400,200);
+               setPreferredSize(new Dimension(400,200));
+               setResizable(false);
+               envir=new JPanel();
+               envir.setLayout(new BorderLayout());
+               JTextPane tex=new JTextPane();
+               tex.setText(message);
+               tex.setEditable(false);
+                            
+               addWindowListener(new WindowAdapter() {
+                     @Override
+                     public void windowClosing(WindowEvent e) {
+                                    dispose(); //do something
+                         }});
+               setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+               
+               okbut=new JButton("OK");
+               okbut.addActionListener(new ActionListener(){
+                                        @Override
+                                        public void actionPerformed(ActionEvent e)
+                                          {                                            
+                                            dispose();
+                                          }
+                                   });
+               envir.add(new JScrollPane(tex),BorderLayout.CENTER);
+               JPanel buttonPanel=new JPanel(new FlowLayout());
+               buttonPanel.add(okbut);
+               envir.add(buttonPanel,BorderLayout.SOUTH);
+               add(envir);
+            }          
+      }
+       
   class OptionActionListener implements ActionListener
     {
 
@@ -352,8 +393,10 @@ public class YASPPMainPanel extends JPanel
             model.fireTableDataChanged();
           } 
         catch (SparqlReasonerException ex)
-          {
-            java.util.logging.Logger.getLogger(YASPPMainPanel.class.getName()).log(Level.SEVERE, null, ex);
+          {            
+           ErrorQueryMessage messaged=new ErrorQueryMessage(ex.toString(), "Error on Query");
+           messaged.setVisible(true);
+           
           }
     }
   
