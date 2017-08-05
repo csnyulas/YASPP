@@ -138,8 +138,7 @@ public class YASPPMainPanel extends JPanel
             {
                setTitle(title);
                setVisible(false);         
-               setModal(true);
-               setLocationRelativeTo(null); 
+               setModal(true);                
                setSize(400,200);
                setPreferredSize(new Dimension(400,200));
                setResizable(false);
@@ -169,6 +168,7 @@ public class YASPPMainPanel extends JPanel
                buttonPanel.add(okbut);
                envir.add(buttonPanel,BorderLayout.SOUTH);
                add(envir);
+               setLocationRelativeTo(null);
             }          
       }
        
@@ -416,8 +416,7 @@ public class OptionDialog extends JDialog
          setSize(300,150);
          setPreferredSize(new Dimension(300,150));
          setVisible(false);         
-         setModal(true);
-         setLocationRelativeTo(null);
+         setModal(true);        
          setLayout(new BorderLayout());
          addWindowListener(new WindowAdapter() {
                      @Override
@@ -453,6 +452,7 @@ public class OptionDialog extends JDialog
          
          add(topPanel, BorderLayout.NORTH);
          add(bottomPanel, BorderLayout.SOUTH);
+         setLocationRelativeTo(null);
      }  
     public void closeDiscard()
       {
