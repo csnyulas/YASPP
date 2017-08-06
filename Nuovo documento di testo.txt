@@ -1,0 +1,59 @@
+ class ProgressWorker extends SwingWorker
+ {  ProgressBarView bar;
+    
+    public ProgressWorker(String message, String title)
+    {
+      bar=new ProgressBarView(message,title);
+      bar.launchView();
+    }
+
+  
+        
+        protected Object doInBackground() throws Exception {
+            int i=0;
+         while(!isCancelled()){log.info(""+i);i++; }  
+         return "";
+        }
+ 
+        public void terminates()
+        {
+          bar.closeView();
+          cancel(true);
+        }
+ }
+   class ProgressBarView extends JDialog
+   {
+     private  JPanel pbcontainer;
+     private  JProgressBar pbar;
+     private  JLabel barLabel;
+     public ProgressBarView (String message, String title)
+     {
+       setTitle(title);
+       setModal(true);
+       setSize(400,100);       
+       setPreferredSize(new Dimension(400,100));
+       setLayout(new FlowLayout());
+       setResizable(false);
+       pbcontainer=new JPanel();
+       pbcontainer.setLayout(new FlowLayout());
+       barLabel=new JLabel(message);
+       pbar=new JProgressBar();
+       pbcontainer.add(barLabel);
+       pbcontainer.add(pbar);       
+       add(pbcontainer);
+       setLocationRelativeTo(null);
+     }
+     public void launchView()
+     {   
+         pbar.setVisible(true);      
+         setVisible(true);
+         pbar.setIndeterminate(true);
+     }
+     public void closeView()
+     {        
+        pbar.setIndeterminate(false);
+        pbar.setVisible(false);
+        dispose();
+     }
+   }
+ 

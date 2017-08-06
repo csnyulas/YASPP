@@ -37,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import javax.swing.event.TableModelListener;
 import org.protege.editor.owl.rdf.SparqlInferenceFactory;
 import org.protege.editor.owl.rdf.SparqlReasoner;
 import org.protege.editor.owl.rdf.SparqlReasonerException;
@@ -174,64 +175,7 @@ public class YASPPMainPanel extends JPanel
             }          
       }
    
- class ProgressWorker extends SwingWorker
- {  ProgressBarView bar;
-    
-    public ProgressWorker(String message, String title)
-    {
-      bar=new ProgressBarView(message,title);
-      bar.launchView();
-    }
 
-  
-        @Override
-        protected Object doInBackground() throws Exception {
-           
-         return "";
-        }
- 
-        public void terminates()
-        {
-          bar.closeView();
-          this.done();
-        }
- }
-   class ProgressBarView extends JDialog
-   {
-     private  JPanel pbcontainer;
-     private  JProgressBar pbar;
-     private  JLabel barLabel;
-     public ProgressBarView (String message, String title)
-     {
-       setTitle(title);
-       setModal(true);
-       setSize(400,100);       
-       setPreferredSize(new Dimension(400,100));
-       setLayout(new FlowLayout());
-       setResizable(false);
-       pbcontainer=new JPanel();
-       pbcontainer.setLayout(new FlowLayout());
-       barLabel=new JLabel(message);
-       pbar=new JProgressBar();
-       pbcontainer.add(barLabel);
-       pbcontainer.add(pbar);       
-       add(pbcontainer);
-       setLocationRelativeTo(null);
-     }
-     public void launchView()
-     {   
-         pbar.setVisible(true);      
-         setVisible(true);
-         pbar.setIndeterminate(true);
-     }
-     public void closeView()
-     {        
-        pbar.setIndeterminate(false);
-        pbar.setVisible(false);
-        dispose();
-     }
-   }
- 
   class OptionActionListener implements ActionListener
     {
 
@@ -329,8 +273,8 @@ public class YASPPMainPanel extends JPanel
             int retrival = chooser.showSaveDialog(null);
             if (retrival == JFileChooser.APPROVE_OPTION)
              {     
-               ProgressWorker pbarView=new ProgressWorker("Executing","Running Operation");
-               pbarView.execute();
+              // ProgressWorker pbarView=new ProgressWorker("Executing","Running Operation");
+             //  pbarView.execute();
               try 
                {
                    
@@ -373,7 +317,8 @@ public class YASPPMainPanel extends JPanel
                    {
                      log.info("Error on writing Query on file.");
                    }
-              pbarView.terminates();
+              //pbarView.terminates();
+              //pbarView.cancel(true);
              }           
           }    
     }
@@ -533,6 +478,7 @@ public class OptionDialog extends JDialog
     public YASPPTableModel(int x, int y)
       {
          super(x, y);         
+          
       }
            
     public boolean isCellEditable() {
