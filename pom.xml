@@ -91,6 +91,7 @@
                             org.protege.editor.owl.ui.table;version="5.0",
                             org.protege.editor.owl.ui.view;version="5.0",
                             org.protege.owl.rdf;version="2.0",
+                            org.apache.poi,
                             *
 			</Import-Package>
                          <Export-Package>org.protege.editor.owl.rdf.*;version="5.0.0"</Export-Package>
