@@ -3,12 +3,15 @@ import  org.apache.poi.hssf.usermodel.HSSFSheet;
 import  org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import  org.apache.poi.hssf.usermodel.HSSFRow;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
@@ -39,6 +42,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import javax.swing.table.TableCellEditor;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
@@ -94,15 +98,15 @@ public class YASPPMainPanel extends JPanel
         queryArea.setText(defaultText);
         scrollNorthArea=new JScrollPane(queryArea);
         
-        execute= new JButton("Execute");
+        execute= new JButton("Execute Query");
         execute.addActionListener(new ExecuteActionListener());
-        export= new JButton("Export");
+        export= new JButton("Export Results");
         export.addActionListener(new ExportActionListener());
-        exportOpz = new JButton("Option");
+        exportOpz = new JButton("Options");
         exportOpz.addActionListener(new OptionActionListener());
-        importQ = new JButton("Import");
+        importQ = new JButton("Import Query");
         importQ.addActionListener(new ImportActionListener());
-        saveQ=new JButton("Save");
+        saveQ=new JButton("Save Query");
         saveQ.addActionListener(new SaveActionListener());
         buttonArea = new JPanel(new FlowLayout());
         buttonArea.add(execute);
@@ -114,10 +118,26 @@ public class YASPPMainPanel extends JPanel
         model = new YASPPTableModel(0, 2);
         model.setColumnIdentifiers(new String[]{"?subject","?object"});
         outArea=new JTable(model);
-       
-        
+     
         scrollSouthArea=new JScrollPane(outArea);
         outArea.setFillsViewportHeight(true);
+        outArea.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e)
+              {       
+                   TableCellEditor cellEditor = outArea.getCellEditor();
+                    if (cellEditor != null) {
+                        if (!cellEditor.stopCellEditing()) {
+                            cellEditor.cancelCellEditing();
+                        }
+                    }
+                    Component gotFocus = e.getOppositeComponent();
+                    if (!gotFocus.equals(outArea)) {
+                        outArea.clearSelection();
+                    }
+              }           
+                 });
+        
         
         southPanel=new JPanel(new BorderLayout());        
         southPanel.add(buttonArea, BorderLayout.NORTH);
@@ -382,7 +402,7 @@ public class YASPPMainPanel extends JPanel
              //  pbarView.execute();
               try 
                {
-                   
+                  log.info("Exporting results..."); 
                   switch (optionConfig.format)
                      {
                           case 0:
@@ -410,10 +430,13 @@ public class YASPPMainPanel extends JPanel
                             }
                           default: break;
                     }
+                  log.info("Exporting successed.");
                  }
                  catch (IOException ex)
                    {
-                     log.info("Error on writing Query on file.");
+                     log.error("Error on exporting results:" + ex.toString());                     
+                     ErrorQueryMessage messaged=new ErrorQueryMessage(ex.toString(), "Error on exporting results");           
+                     messaged.setVisible(true);
                    }
               //pbarView.terminates();
               //pbarView.cancel(true);
@@ -432,13 +455,16 @@ public class YASPPMainPanel extends JPanel
         {
          try 
           {
+            log.info("Saving Query..."); 
             FileWriter fw = new FileWriter(chooser.getSelectedFile()+".SPARQL");
             fw.write(queryArea.getText());
             fw.close();
           } 
          catch (IOException ex)
            {
-             log.info("Error on writing Query on file.");
+             log.error("Error on writing Query on file. "+ex.toString());
+             ErrorQueryMessage messaged=new ErrorQueryMessage(ex.toString(), "Error on saving query");           
+             messaged.setVisible(true);
            }
         }
       }
@@ -455,6 +481,7 @@ public class YASPPMainPanel extends JPanel
         {
          try 
           {
+            log.info("Importing query..."); 
             FileReader fr = new FileReader(chooser.getSelectedFile());
 	    BufferedReader br = new BufferedReader(fr);
    	    String sCurrentLine=null;
@@ -466,7 +493,9 @@ public class YASPPMainPanel extends JPanel
           } 
          catch (IOException ex)
            {
-             log.info("Error on reading Query file.");
+             log.error("Error on reading Query file. "+ ex.toString());
+             ErrorQueryMessage messaged=new ErrorQueryMessage(ex.toString(), "Error on reading query");           
+             messaged.setVisible(true);
            }
         }
       }   
@@ -487,7 +516,8 @@ public class YASPPMainPanel extends JPanel
     public void actionPerformed(ActionEvent event)
       {    
         try
-          {            
+          {    
+            log.info("Executing query..."); 
             SparqlResultSet set = reasoner.executeQuery(queryArea.getText());                      
             String data[][];                  
             
@@ -502,11 +532,12 @@ public class YASPPMainPanel extends JPanel
             outArea.repaint();
           } 
         catch (SparqlReasonerException ex)
-          {            
-           ErrorQueryMessage messaged=new ErrorQueryMessage(ex.toString(), "Error on Query");
-           messaged.setVisible(true);
-           
+          {      
+           log.error("Error on executing query. "+ ex.toString());
+           ErrorQueryMessage messaged=new ErrorQueryMessage(ex.toString(), "Error on executing query");           
+           messaged.setVisible(true);           
           }
+        log.info("Query execution successed.");
     }
   
   }
@@ -595,8 +626,8 @@ public class OptionDialog extends JDialog
              public void itemStateChanged(ItemEvent event)
                {
                  if (event.getStateChange() == ItemEvent.SELECTED)
-                      {
-                          if( (((String)event.getItem()).equals("Simple Text")))
+                      {  
+                        if(((JComboBox)event.getSource()).getSelectedIndex()==2)                         
                             {
                              formatOptionContainer.add(textOpP);
                             }
