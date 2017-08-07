@@ -6,8 +6,11 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -34,10 +37,14 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.SwingWorker;
+import javax.swing.JTextArea;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
-import javax.swing.event.TableModelListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.Element;
+import javax.swing.text.PlainDocument;
 import org.protege.editor.owl.rdf.SparqlInferenceFactory;
 import org.protege.editor.owl.rdf.SparqlReasoner;
 import org.protege.editor.owl.rdf.SparqlReasonerException;
@@ -62,7 +69,7 @@ public class YASPPMainPanel extends JPanel
      JButton exportOpz;
      JButton importQ;
      JButton saveQ;
-     OptionDialog optionD;     
+     OptionDialog optionD;   
      String defaultText="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+"\n"+
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +"\n"+
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +"\n" +
@@ -105,9 +112,7 @@ public class YASPPMainPanel extends JPanel
         buttonArea.add(importQ);
         buttonArea.add(export);
         buttonArea.add(exportOpz);
-        
-        
-             
+            
         model = new YASPPTableModel(0, 2);
         model.setColumnIdentifiers(new String[]{"?subject","?object"});
         outArea=new JTable(model);
@@ -133,6 +138,65 @@ public class YASPPMainPanel extends JPanel
 			reasoner = null;}
     }
 
+     public class SizeFilter extends DocumentFilter {
+
+    private int maxCharacters;    
+
+    public SizeFilter(int maxChars) {
+        maxCharacters = maxChars;
+    }
+
+    @Override
+    public void insertString(FilterBypass fb, int offs, String str, AttributeSet a)
+            throws BadLocationException {
+
+        if ((fb.getDocument().getLength() + str.length()) <= maxCharacters && !str.contains("\n"))
+            super.insertString(fb, offs, str, a);
+        else
+            Toolkit.getDefaultToolkit().beep();
+    }
+
+    @Override
+    public void replace(FilterBypass fb, int offs, int length, String str, AttributeSet a)
+            throws BadLocationException {
+
+        if ((fb.getDocument().getLength() + str.length()
+                - length) <= maxCharacters && !str.contains("\n"))
+            super.replace(fb, offs, length, str, a);
+        else
+            Toolkit.getDefaultToolkit().beep();
+    }
+}
+     
+    class TextOptionPanel extends JPanel
+      {
+        private JLabel separLabel;
+        private JLabel endLabel;
+        private JTextArea colSep;
+        private JTextArea rowSep;
+        public TextOptionPanel()
+          {
+                 setLayout(new FlowLayout());
+                 separLabel=new JLabel("Column Separator");
+                 endLabel=new JLabel("Row Separator");
+                 colSep=new JTextArea(1,6);
+                 colSep.setLineWrap(false);
+                 colSep.setWrapStyleWord( false );                
+                 ((PlainDocument) colSep.getDocument()).setDocumentFilter(new SizeFilter(6));
+                                         
+                 rowSep=new JTextArea(1,6);
+                 rowSep.setLineWrap(false);
+                 rowSep.setWrapStyleWord( false );                
+                 ((PlainDocument) rowSep.getDocument()).setDocumentFilter(new SizeFilter(6));
+                 
+                 setLayout(new FlowLayout());
+                 add(separLabel);
+                 add(colSep);
+                 add(endLabel);
+                 add(rowSep);
+          }
+        public String[] getParameters(){return new String[]{colSep.getText(), rowSep.getText()};}
+      }
     class ErrorQueryMessage extends JDialog
       {
           private JPanel envir;
@@ -261,6 +325,31 @@ public class YASPPMainPanel extends JPanel
             bw.write("]}}");            
           }
 
+        private void toSimpleText(YASPPTableModel model, BufferedWriter bw) throws IOException
+          {
+            StringBuilder result = new StringBuilder();            
+            for(int i=0; i<model.getColumnCount(); i++)
+              {
+                result.append(model.getColumnName(i));
+                if(i<model.getColumnCount()-1)
+                    result.append(optionConfig.param[0]);
+              }
+            result.append(optionConfig.param[1]);
+            bw.write(result.toString());
+           
+            for(int i=0; i < model.getRowCount(); i++)
+               { 
+                result=new StringBuilder();               
+                for(int j=0; j < model.getColumnCount(); j++)
+                 {
+                   result.append(model.getValueAt(i, j));
+                   if(j<model.getColumnCount()-1)
+                       result.append( result.append(optionConfig.param[0]));
+                 }
+                bw.write( (result.append( result.append(optionConfig.param[1]))).toString());
+               }
+          }
+
         @Override
         public void actionPerformed(ActionEvent e)
           { 
@@ -309,7 +398,15 @@ public class YASPPMainPanel extends JPanel
                                 toJSON(model, bw);                                 
                                 bw.close();
                                 break;  
-                              } 
+                              }
+                          case 2:
+                            {
+                                BufferedWriter bw = 
+                                    new BufferedWriter(new FileWriter(chooser.getSelectedFile(), true));
+                                toSimpleText(model, bw);                                 
+                                bw.close();
+                                break;
+                            }
                           default: break;
                     }
                  }
@@ -418,7 +515,9 @@ public class OptionDialog extends JDialog
     JPanel bottomPanel;
     JComboBox formatBox;
     JButton okbutton;
-    
+    TextOptionPanel textOpP;
+    JPanel formatOptionContainer;
+       
     public OptionDialog (JFrame parent)
      {
          super(parent, "Options");
@@ -427,6 +526,7 @@ public class OptionDialog extends JDialog
          setVisible(false);         
          setModal(true);        
          setLayout(new BorderLayout());
+         setResizable(false);
          addWindowListener(new WindowAdapter() {
                      @Override
                      public void windowClosing(WindowEvent e) {
@@ -434,21 +534,13 @@ public class OptionDialog extends JDialog
                          }});
          
          
-         formatBox=new JComboBox(new String[]{"Microsoft Excel", "SPARQL JSON"});
+         formatBox=new JComboBox(new String[]{"Microsoft Excel", "SPARQL JSON", "Simple Text"});
          formatBox.setPreferredSize(new Dimension(200, formatBox.getPreferredSize().height));
+         
          
          optionConfig=new OptionConfig(formatBox.getSelectedIndex());
          
-         okbutton=new JButton("OK");
-         okbutton.addActionListener(new ActionListener(){
-                                        @Override
-                                        public void actionPerformed(ActionEvent e)
-                                          {
-                                            optionConfig.save(formatBox.getSelectedIndex());
-                                            dispose();
-                                          }
-                                   });
-                 
+         okbutton=new JButton("OK");                 
          
          topPanel=new JPanel();
          topPanel.setLayout(new FlowLayout());
@@ -459,14 +551,57 @@ public class OptionDialog extends JDialog
          bottomPanel.setLayout(new FlowLayout());
          bottomPanel.add(okbutton);
          
+        textOpP=new TextOptionPanel();
+        formatOptionContainer =new JPanel();
+         
          add(topPanel, BorderLayout.NORTH);
          add(bottomPanel, BorderLayout.SOUTH);
+         add(formatOptionContainer);
+         
+         formatBox.addItemListener(new FormatActionListener(this));
+         okbutton.addActionListener(new ActionListener(){
+                                        @Override
+                                        public void actionPerformed(ActionEvent e)
+                                          {
+                                            if(formatBox.getSelectedIndex()==2)
+                                                optionConfig.save(formatBox.getSelectedIndex(),
+                                                                  textOpP.getParameters());
+                                            
+                                            optionConfig.save(formatBox.getSelectedIndex());
+                                            dispose();
+                                          }
+                                   });
+         
          setLocationRelativeTo(null);
      }  
     public void closeDiscard()
       {
           formatBox.setSelectedIndex(optionConfig.format);
           dispose();
+      }
+    
+    class FormatActionListener implements ItemListener
+      {
+        JDialog parent;        
+        public FormatActionListener(JDialog _parent)
+          {
+            parent=_parent;           
+          }
+
+             @Override
+             public void itemStateChanged(ItemEvent event)
+               {
+                 if (event.getStateChange() == ItemEvent.SELECTED)
+                      {
+                          if( (((String)event.getItem()).equals("Simple Text")))
+                            {
+                             formatOptionContainer.add(textOpP);
+                            }
+                       }
+                 else {formatOptionContainer.removeAll();}
+                 parent.revalidate();                
+                 parent.repaint();
+               }
       }
   }
 
@@ -489,9 +624,17 @@ public class OptionDialog extends JDialog
 class OptionConfig
   {
      int format;
-     public OptionConfig(){ format=-1;}
-     public OptionConfig(int value){format=value;}
+     String[] param;
+     public OptionConfig(){
+         format=-1; param=new String[]{};
+     }
+     public OptionConfig(int value){format=value; param=new String[]{};}
      public void save(int _format){format=_format;}
+     public void save(int _format, String[] _param)
+       {
+         save(_format);
+         param=_param;
+       }
   }
 
  
