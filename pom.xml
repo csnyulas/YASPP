@@ -4,13 +4,13 @@
 	
 	<groupId>dmi.protege.YASPP</groupId>
 	<artifactId>protege.plugin.YASPP</artifactId>
-	<version>0.0.1</version>	
+	<version>1.0.0</version>	
         <packaging>bundle</packaging>
 	<name>YASPP Plugin for Protege</name>
 	<description> Yet Another SPARQL Plugin for Protege</description>
 	
     <organization>
-        <name>Department of Mathematics and Computer Science</name>
+        <name>Department of Mathematics and Computer Science, University of Catania</name>
         <url>http://dmi.unict.it/</url>
     </organization>
 
