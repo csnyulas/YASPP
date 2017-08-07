@@ -41,9 +41,7 @@ import javax.swing.JTextArea;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.DocumentFilter;
-import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
 import org.protege.editor.owl.rdf.SparqlInferenceFactory;
 import org.protege.editor.owl.rdf.SparqlReasoner;
@@ -116,6 +114,7 @@ public class YASPPMainPanel extends JPanel
         model = new YASPPTableModel(0, 2);
         model.setColumnIdentifiers(new String[]{"?subject","?object"});
         outArea=new JTable(model);
+       
         
         scrollSouthArea=new JScrollPane(outArea);
         outArea.setFillsViewportHeight(true);
@@ -324,7 +323,24 @@ public class YASPPMainPanel extends JPanel
                        
             bw.write("]}}");            
           }
-
+        private void toExcel(YASPPTableModel model, String name, FileOutputStream fileOut) throws IOException
+          {
+            // FileWriter fw = new FileWriter(chooser.getSelectedFile()+".xls");
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            HSSFSheet sheet = workbook.createSheet(name);  
+            for(int i=0; i < model.getRowCount(); i++)
+              {
+               HSSFRow rowhead = sheet.createRow((short)i);
+               for(int j=0; j < model.getColumnCount(); j++)
+                {
+                  rowhead.createCell(j).setCellValue(model.getValueAt(i,j).toString());                                       
+                }                    
+              }
+            for(int i=0; i< model.getColumnCount(); i++)
+             sheet.autoSizeColumn(i); 
+                               
+            workbook.write(fileOut);                              
+          }
         private void toSimpleText(YASPPTableModel model, BufferedWriter bw) throws IOException
           {
             StringBuilder result = new StringBuilder();            
@@ -370,25 +386,10 @@ public class YASPPMainPanel extends JPanel
                   switch (optionConfig.format)
                      {
                           case 0:
-                             {                   
-                             // FileWriter fw = new FileWriter(chooser.getSelectedFile()+".xls");
-                              HSSFWorkbook workbook = new HSSFWorkbook();
-                              HSSFSheet sheet = workbook.createSheet(chooser.getSelectedFile().getName()+".xls");  
-                              for(int i=0; i < model.getRowCount(); i++)
-                                {
-                                  HSSFRow rowhead = sheet.createRow((short)i);
-                                  
-                                  for(int j=0; j < model.getColumnCount(); j++)
-                                    {
-                                      rowhead.createCell(j).setCellValue(model.getValueAt(i,j).toString());                                       
-                                    }
-                                  
-                                }
-                               for(int i=0; i< model.getColumnCount(); i++)
-                                   sheet.autoSizeColumn(i); 
-                               FileOutputStream fileOut = new FileOutputStream(chooser.getSelectedFile()+".xls");
-                               workbook.write(fileOut);
-                               fileOut.close();
+                             {  
+                               FileOutputStream fileout = new FileOutputStream(chooser.getSelectedFile()+".xls");
+                               toExcel(model, chooser.getSelectedFile().getName(), fileout);                             
+                               fileout.close();
                                break;                       
                              }                     
                           case 1: 
@@ -497,6 +498,8 @@ public class YASPPMainPanel extends JPanel
             data=createData(set);
             model.setDataVector(data, names);
             model.fireTableDataChanged();
+            outArea.revalidate();
+            outArea.repaint();
           } 
         catch (SparqlReasonerException ex)
           {            
