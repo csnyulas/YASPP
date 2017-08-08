@@ -20,7 +20,9 @@
             <url>http://www.gnu.org/copyleft/lesser.html</url>
         </license>
     </licenses>
-        
+    
+    <Update-URL>http://www.dmi.unict.it/~santamaria/projects/YASPP/update.properties</Update-URL> 
+           
     <developers>
         <developer>
             <name>Daniele Francesco Santamaria</name>
