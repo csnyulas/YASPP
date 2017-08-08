@@ -132,8 +132,8 @@ public class YASPPMainPanel extends JPanel
                         }
                     }
                     Component gotFocus = e.getOppositeComponent();
-                    if (!gotFocus.equals(outArea) && !gotFocus.equals(export) ) {
-                        outArea.clearSelection();
+                    if (! (gotFocus.equals(outArea) || gotFocus.equals(export) )) {
+                        outArea.clearSelection(); 
                     }
               }           
                  });
