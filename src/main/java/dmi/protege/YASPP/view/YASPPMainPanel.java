@@ -132,7 +132,7 @@ public class YASPPMainPanel extends JPanel
                         }
                     }
                     Component gotFocus = e.getOppositeComponent();
-                    if (!gotFocus.equals(outArea)) {
+                    if (!gotFocus.equals(outArea) && !gotFocus.equals(export) ) {
                         outArea.clearSelection();
                     }
               }           
@@ -274,7 +274,7 @@ public class YASPPMainPanel extends JPanel
     class ExportActionListener implements ActionListener
     {
 
-        private void toJSON(YASPPTableModel model,  BufferedWriter bw) throws IOException
+        private void toJSON(YASPPTableModel model, int[] iterator, BufferedWriter bw) throws IOException
           {            
             StringBuilder result = new StringBuilder();
             result.append("{" + "\"head\": {");
@@ -290,7 +290,7 @@ public class YASPPMainPanel extends JPanel
             result.append("\"results\": { ");
             result.append(" \"bindings\": ["); //open bindings
             bw.write(result.toString());
-            for(int i=0; i < model.getRowCount(); i++)
+            for(int i=0; i < iterator.length; i++)
                {
                 result=new StringBuilder();
                 result.append("{");
@@ -299,15 +299,15 @@ public class YASPPMainPanel extends JPanel
                    result.append("\"").append(model.getColumnName(j)).append("\":");
                    result.append("{");
                    result.append("\"type\":");                   
-                   if(!model.getValueAt(i, j).toString().startsWith("\""))
+                   if(!model.getValueAt( iterator[i], j).toString().startsWith("\""))
                       {
                         result.append("\"uri\",\"value\":\"");                          
-                        result.append(model.getValueAt(i, j).toString()).append("\"");
+                        result.append(model.getValueAt(iterator[i], j).toString()).append("\"");
                       }
                     else
                       {  
                         result.append("\"literal\",\"value\":"); 
-                        String value= model.getValueAt(i, j).toString();                         
+                        String value= model.getValueAt(iterator[i], j).toString();                         
                         int dataMark= value.indexOf("^");
                         String type="";
                         int initMark=dataMark+3;
@@ -336,24 +336,24 @@ public class YASPPMainPanel extends JPanel
                      result.append(",");
                   }
                  result.append("}");
-                 if(i!=model.getRowCount()-1)
+                 if(i!=iterator.length-1)
                    result.append(",");
                  bw.write(result.toString());
                }
                        
             bw.write("]}}");            
           }
-        private void toExcel(YASPPTableModel model, String name, FileOutputStream fileOut) throws IOException
+        private void toExcel(YASPPTableModel model, int[] iterator, String name, FileOutputStream fileOut) throws IOException
           {
             // FileWriter fw = new FileWriter(chooser.getSelectedFile()+".xls");
             HSSFWorkbook workbook = new HSSFWorkbook();
             HSSFSheet sheet = workbook.createSheet(name);  
-            for(int i=0; i < model.getRowCount(); i++)
+            for(int i=0; i < iterator.length; i++)
               {
                HSSFRow rowhead = sheet.createRow((short)i);
                for(int j=0; j < model.getColumnCount(); j++)
                 {
-                  rowhead.createCell(j).setCellValue(model.getValueAt(i,j).toString());                                       
+                  rowhead.createCell(j).setCellValue(model.getValueAt(iterator[i],j).toString());                                       
                 }                    
               }
             for(int i=0; i< model.getColumnCount(); i++)
@@ -361,7 +361,7 @@ public class YASPPMainPanel extends JPanel
                                
             workbook.write(fileOut);                              
           }
-        private void toSimpleText(YASPPTableModel model, BufferedWriter bw) throws IOException
+        private void toSimpleText(YASPPTableModel model, int [] iterator, BufferedWriter bw) throws IOException
           {
             StringBuilder result = new StringBuilder();            
             for(int i=0; i<model.getColumnCount(); i++)
@@ -373,16 +373,17 @@ public class YASPPMainPanel extends JPanel
             result.append(optionConfig.param[1]);
             bw.write(result.toString());
            
-            for(int i=0; i < model.getRowCount(); i++)
+            for(int i=0; i < iterator.length; i++)
                { 
                 result=new StringBuilder();               
                 for(int j=0; j < model.getColumnCount(); j++)
                  {
-                   result.append(model.getValueAt(i, j));
+                   result.append(model.getValueAt(iterator[i], j));
                    if(j<model.getColumnCount()-1)
-                       result.append( result.append(optionConfig.param[0]));
+                       result.append(optionConfig.param[0]);
                  }
-                bw.write( (result.append( result.append(optionConfig.param[1]))).toString());
+                result.append(optionConfig.param[1]);
+                bw.write(result.toString());
                }
           }
 
@@ -400,6 +401,21 @@ public class YASPPMainPanel extends JPanel
              {     
               // ProgressWorker pbarView=new ProgressWorker("Executing","Running Operation");
              //  pbarView.execute();
+              
+              int iterator[];
+              if(outArea.getSelectedRowCount()>0)                
+                {
+                  iterator=new int[outArea.getSelectedRowCount()];
+                  for(int i=0;i<outArea.getSelectedRowCount();i++)
+                    iterator[i]= outArea.convertRowIndexToModel(outArea.getSelectedRows()[i]);
+                }
+              else
+                {
+                  iterator=new int[model.getRowCount()];
+                  for(int i=0; i<model.getRowCount();i++)
+                   iterator[i]=i;
+                }
+                
               try 
                {
                   log.info("Exporting results..."); 
@@ -408,7 +424,7 @@ public class YASPPMainPanel extends JPanel
                           case 0:
                              {  
                                FileOutputStream fileout = new FileOutputStream(chooser.getSelectedFile()+".xls");
-                               toExcel(model, chooser.getSelectedFile().getName(), fileout);                             
+                               toExcel(model, iterator, chooser.getSelectedFile().getName(), fileout);                             
                                fileout.close();
                                break;                       
                              }                     
@@ -416,7 +432,7 @@ public class YASPPMainPanel extends JPanel
                               {     
                                 BufferedWriter bw = 
                                     new BufferedWriter(new FileWriter(chooser.getSelectedFile()+".srj", true));
-                                toJSON(model, bw);                                 
+                                toJSON(model, iterator, bw);                                 
                                 bw.close();
                                 break;  
                               }
@@ -424,7 +440,7 @@ public class YASPPMainPanel extends JPanel
                             {
                                 BufferedWriter bw = 
                                     new BufferedWriter(new FileWriter(chooser.getSelectedFile(), true));
-                                toSimpleText(model, bw);                                 
+                                toSimpleText(model, iterator, bw);                                 
                                 bw.close();
                                 break;
                             }
