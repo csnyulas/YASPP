@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>dmi.protege.YASPP</groupId>
-	<artifactId>protege.plugin.YASPP</artifactId>
+	<groupId>dmi.protege.plugin</groupId>
+	<artifactId>dmi.YASPP</artifactId>
 	<version>1.0.0</version>	
         <packaging>bundle</packaging>
 	<name>YASPP Plugin for Protege</name>
@@ -80,7 +80,7 @@
 		 <Bundle-Activator>org.protege.editor.owl.ProtegeOWL</Bundle-Activator>
 		 <Bundle-ClassPath>.</Bundle-ClassPath>
 			<Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
-			<Bundle-Vendor>The Protege Development Team</Bundle-Vendor>
+			<Bundle-Vendor>University of Catania</Bundle-Vendor>
 			<Import-Package>
 		    	   org.protege.editor.core;version="5.0", <!-- equivalent to [5.0,infinity) -->
                             org.protege.editor.core.ui.error;version="5.0",
