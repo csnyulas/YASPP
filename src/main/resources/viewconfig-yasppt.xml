@@ -3,10 +3,10 @@
     <VSNode splits="1.0">
         <HSNode splits="1.0">
             <CNode>
-                <Component label="YASPPIQ">
-                    <Property id="pluginId" value="protege.plugin.YASPP.YASPPI"/>
+                <Component label="YASPP Query">
+                    <Property id="pluginId" value="dmi.YASPP.YASPPI"/>
                 </Component>
-            </CNode>          
+            </CNode>
         </HSNode>
     </VSNode>
 </layout>
