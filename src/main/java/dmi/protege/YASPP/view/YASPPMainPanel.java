@@ -80,8 +80,10 @@ public class YASPPMainPanel extends JPanel
                         " WHERE { ?subject rdfs:subClassOf ?object }";
      OWLEditorKit editorKit;
      OptionConfig optionConfig;
+     String [] bnodeVal;
     public YASPPMainPanel(OWLEditorKit kit)
-     {        
+     {      
+        bnodeVal=new String[]{"http://protege.org/owl2triplestore.owl"};
         optionConfig=new OptionConfig();
         editorKit=kit;        
         List<SparqlInferenceFactory> plugins = Collections.singletonList((SparqlInferenceFactory) new BasicSparqlReasonerFactory());
@@ -274,6 +276,18 @@ public class YASPPMainPanel extends JPanel
     
     }
     
+   public int isBnode(String tomatch)
+     {
+       for(int i=0; i< bnodeVal.length; i++)
+         {
+           if(tomatch.startsWith(bnodeVal[i]))
+               return bnodeVal[i].length();
+         
+         }
+       return 0;
+     }
+   
+  
     class ExportActionListener implements ActionListener
     {
 
@@ -304,11 +318,20 @@ public class YASPPMainPanel extends JPanel
                    result.append("\"type\":");                   
                    if(!model.getValueAt( iterator[i], j).toString().startsWith("\""))
                       {
-                        result.append("\"uri\",\"value\":\"");                          
-                        result.append(model.getValueAt(iterator[i], j).toString()).append("\"");
-                      }
+                        int c=isBnode(model.getValueAt(iterator[i], j).toString());
+                        if(c>0)
+                          {
+                            result.append("\"bnode\",\"value\":");
+                            result.append("\"").append(model.getValueAt(iterator[i], j).toString()).append("\"");
+                          }
+                        else
+                         {
+                          result.append("\"uri\",\"value\":\"");                          
+                          result.append(model.getValueAt(iterator[i], j).toString()).append("\"");
+                         }
+                      }                 
                     else
-                      {  
+                      {                      
                         result.append("\"literal\",\"value\":"); 
                         String value= model.getValueAt(iterator[i], j).toString();                         
                         int dataMark= value.indexOf("^");
