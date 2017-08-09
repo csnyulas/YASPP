@@ -132,9 +132,12 @@ public class YASPPMainPanel extends JPanel
                         }
                     }
                     Component gotFocus = e.getOppositeComponent();
-                    if (! (gotFocus.equals(outArea) || gotFocus.equals(export) )) {
+                    if (! (gotFocus.equals(outArea) || gotFocus.equals(export) )) 
+                      {
                         outArea.clearSelection(); 
-                    }
+                        outArea.revalidate();
+                        outArea.repaint();
+                      }
               }           
                  });
         
